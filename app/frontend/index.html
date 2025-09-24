@@ -11,9 +11,14 @@
 
   <script>
     async function callApi() {
-      const res = await fetch("/api/hello");
-      const data = await res.json();
-      document.getElementById("response").innerText = data.message;
+      try {
+        // Call API through ingress
+        const res = await fetch("/api/hello");
+        const data = await res.json();
+        document.getElementById("response").innerText = data.message;
+      } catch (error) {
+        document.getElementById("response").innerText = "Error calling API: " + error.message;
+      }
     }
   </script>
 </body>
