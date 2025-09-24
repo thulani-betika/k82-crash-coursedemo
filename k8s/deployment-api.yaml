@@ -1,20 +1,63 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-deployment
-  namespace: demo
+  name: k8s-demo-api
+  namespace: k8s-demo
+  labels:
+    app: k8s-demo-api
+    app.kubernetes.io/name: k8s-demo-api
+    app.kubernetes.io/part-of: k8s-demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: api
+      app: k8s-demo-api
   template:
     metadata:
       labels:
-        app: api
+        app: k8s-demo-api
+        app.kubernetes.io/name: k8s-demo-api
+        app.kubernetes.io/part-of: k8s-demo
     spec:
       containers:
       - name: api
-        image: thulani1960/k8s-api:latest
+        image: k8s-demo-api:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8080"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL

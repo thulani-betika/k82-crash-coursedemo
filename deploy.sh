@@ -1,47 +1,130 @@
 #!/bin/bash
 
-echo "🚀 Deploying Kubernetes Demo Application..."
+# Deployment script for Kubernetes Demo
+# This script provides a simple way to deploy the application
 
-# Create namespace
-echo "📁 Creating namespace..."
-kubectl apply -f k8s-namespace/
+set -e
 
-# Deploy applications
-echo "🔧 Deploying applications..."
-kubectl apply -f k8s/
+echo "🚀 Kubernetes Demo Deployment Script"
+echo "====================================="
 
-# Wait for deployments to be ready
-echo "⏳ Waiting for deployments to be ready..."
-kubectl wait --for=condition=available --timeout=300s deployment/frontend-deployment -n demo
-kubectl wait --for=condition=available --timeout=300s deployment/api-deployment -n demo
+# Check if kubectl is available
+if ! command -v kubectl &> /dev/null; then
+    echo "❌ kubectl is not installed. Please install kubectl first."
+    exit 1
+fi
 
-# Check pod status
-echo "📊 Checking pod status..."
-kubectl get pods -n demo
+# Check if skaffold is available
+if ! command -v skaffold &> /dev/null; then
+    echo "❌ skaffold is not installed. Please install skaffold first."
+    exit 1
+fi
 
-# Check services
-echo "🔗 Checking services..."
-kubectl get services -n demo
+# Function to check cluster connectivity
+check_cluster() {
+    echo "🔍 Checking cluster connectivity..."
+    if ! kubectl cluster-info &> /dev/null; then
+        echo "❌ Cannot connect to Kubernetes cluster. Please ensure your cluster is running."
+        exit 1
+    fi
+    echo "✅ Cluster connectivity confirmed"
+}
 
-# Check ingress (if available)
-echo "🌐 Checking ingress..."
-kubectl get ingress -n demo
+# Function to deploy with skaffold
+deploy_with_skaffold() {
+    echo "🚀 Deploying with Skaffold..."
+    skaffold run
+    echo "✅ Deployment completed with Skaffold"
+}
 
-echo ""
-echo "✅ Deployment completed!"
-echo ""
-echo "📋 Access Information:"
-echo "===================="
-echo "Frontend (NodePort): http://localhost:30080"
-echo "API (NodePort): http://localhost:30081"
-echo ""
-echo "If you have an Ingress Controller installed:"
-echo "Frontend: http://localhost/"
-echo "API: http://localhost/api/hello"
-echo ""
-echo "🔍 To check logs:"
-echo "kubectl logs -f deployment/frontend-deployment -n demo"
-echo "kubectl logs -f deployment/api-deployment -n demo"
-echo ""
-echo "🧹 To clean up:"
-echo "kubectl delete namespace demo"
+# Function to deploy manually
+deploy_manual() {
+    echo "🔨 Building Docker images..."
+    docker build -t k8s-demo-frontend ./app/frontend
+    docker build -t k8s-demo-api ./app/api
+    
+    echo "🚀 Deploying to Kubernetes..."
+    kubectl apply -f k8s/
+    
+    echo "⏳ Waiting for deployments to be ready..."
+    kubectl wait --for=condition=available --timeout=300s deployment/k8s-demo-frontend -n k8s-demo
+    kubectl wait --for=condition=available --timeout=300s deployment/k8s-demo-api -n k8s-demo
+    
+    echo "✅ Manual deployment completed"
+}
+
+# Function to show status
+show_status() {
+    echo "📊 Deployment Status:"
+    echo ""
+    echo "Namespaces:"
+    kubectl get namespaces | grep k8s-demo || echo "No k8s-demo namespace found"
+    echo ""
+    echo "Pods:"
+    kubectl get pods -n k8s-demo
+    echo ""
+    echo "Services:"
+    kubectl get services -n k8s-demo
+    echo ""
+    echo "Ingress:"
+    kubectl get ingress -n k8s-demo
+    echo ""
+    echo "To view logs:"
+    echo "  kubectl logs -l app=k8s-demo-frontend -n k8s-demo"
+    echo "  kubectl logs -l app=k8s-demo-api -n k8s-demo"
+}
+
+# Function to show access information
+show_access_info() {
+    echo "🌐 Access Information:"
+    echo ""
+    
+    # Check if running in minikube
+    if kubectl config current-context | grep -q minikube; then
+        MINIKUBE_IP=$(minikube ip 2>/dev/null || echo "unknown")
+        echo "Minikube detected. Access URLs:"
+        echo "  Frontend: http://$MINIKUBE_IP"
+        echo "  Backend API: http://$MINIKUBE_IP/api"
+    else
+        echo "Access URLs (assuming localhost):"
+        echo "  Frontend: http://localhost"
+        echo "  Backend API: http://localhost/api"
+    fi
+    
+    echo ""
+    echo "To get the external IP of your ingress:"
+    echo "  kubectl get ingress -n k8s-demo"
+}
+
+# Main script logic
+case "${1:-skaffold}" in
+    "skaffold")
+        check_cluster
+        deploy_with_skaffold
+        show_status
+        show_access_info
+        ;;
+    "manual")
+        check_cluster
+        deploy_manual
+        show_status
+        show_access_info
+        ;;
+    "status")
+        show_status
+        ;;
+    "help"|"-h"|"--help")
+        echo "Usage: $0 [skaffold|manual|status|help]"
+        echo ""
+        echo "Commands:"
+        echo "  skaffold  - Deploy using Skaffold (default)"
+        echo "  manual   - Deploy manually with kubectl"
+        echo "  status   - Show deployment status"
+        echo "  help     - Show this help message"
+        ;;
+    *)
+        echo "❌ Unknown command: $1"
+        echo "Use '$0 help' for usage information"
+        exit 1
+        ;;
+esac

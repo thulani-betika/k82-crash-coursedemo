@@ -1,92 +1,250 @@
 # Kubernetes Crash Course Demo
 
-This repository demonstrates the basics of Kubernetes as learned in the course:
-**"Kubernetes Crash Course: Learn the Basics and Build a Microservice Application"**.
+A complete Kubernetes demo project showcasing microservices deployment with frontend and backend components. This project demonstrates real-world Kubernetes concepts including deployments, services, ingress, health checks, and automated development workflows.
 
-## 🚀 Features
-- Simple API (Node.js Express)
-- Frontend (HTML + Nginx)
-- Kubernetes manifests (Deployments, Services, Namespace)
-- Workshop guide for demos
-- Deployable with `kubectl apply -f k8s/`
+## 🏗️ Architecture
 
-## 🛠 How to Run
+- **Frontend**: React/Vite application served on port 3000
+- **Backend**: Node.js/Express API served on port 8080
+- **Ingress**: Exposes frontend at `/` and backend at `/api`
+- **Kubernetes**: Deployments, Services, Ingress with health checks
 
-1. Clone this repo
+## 📋 Prerequisites
+
+- Docker
+- Kubernetes cluster (kind, minikube, or cloud provider)
+- Skaffold (for automated deployment)
+- kubectl
+
+### Installing Prerequisites
+
 ```bash
-git clone https://github.com/yourusername/k8s-crash-course-demo.git
-cd k8s-crash-course-demo
+# Install Skaffold
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+sudo install skaffold /usr/local/bin/
+
+# Install kind (for local development)
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+
+# Install minikube (alternative to kind)
+curl -Lo minikube https://storage.k8s.io/releases/latest/minikube-linux-amd64
+sudo install minikube /usr/local/bin/
 ```
 
-2. Build and push Docker images (replace `your-dockerhub-username`)
+## 🚀 Quick Start
+
+### Option 1: Automated Setup (Recommended)
+
 ```bash
-docker build -t your-dockerhub-username/k8s-api:latest ./app/api
-docker push your-dockerhub-username/k8s-api:latest
+# For kind
+make quick-start-kind
 
-docker build -t your-dockerhub-username/k8s-frontend:latest ./app/frontend
-docker push your-dockerhub-username/k8s-frontend:latest
+# For minikube  
+make quick-start-minikube
 ```
 
-3. Apply Kubernetes manifests
+### Option 2: Manual Setup
+
+#### Using kind
+
+1. **Setup kind cluster:**
+   ```bash
+   make setup-kind
+   ```
+
+2. **Start development:**
+   ```bash
+   make dev
+   ```
+
+3. **Access the application:**
+   - Frontend: http://localhost
+   - Backend API: http://localhost/api
+
+#### Using minikube
+
+1. **Setup minikube:**
+   ```bash
+   make setup-minikube
+   ```
+
+2. **Start development:**
+   ```bash
+   make dev
+   ```
+
+3. **Get minikube IP and access:**
+   ```bash
+   minikube ip
+   # Access at http://<minikube-ip>
+   ```
+
+### Option 3: Manual Deployment
+
+1. **Build images:**
+   ```bash
+   make build
+   ```
+
+2. **Deploy to Kubernetes:**
+   ```bash
+   make deploy
+   ```
+
+3. **Check status:**
+   ```bash
+   make status
+   ```
+
+## 📁 Project Structure
+
+```
+├── app/
+│   ├── frontend/          # React/Vite frontend
+│   │   ├── src/
+│   │   ├── Dockerfile
+│   │   └── package.json
+│   └── api/              # Node.js/Express backend
+│       ├── server.js
+│       ├── Dockerfile
+│       └── package.json
+├── k8s/                  # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── deployment-*.yaml
+│   ├── service-*.yaml
+│   └── ingress.yaml
+├── skaffold.yaml         # Skaffold configuration
+├── Makefile             # Convenient commands
+├── setup-kind.sh        # Kind setup script
+├── setup-minikube.sh    # Minikube setup script
+└── README.md
+```
+
+## ✨ Features
+
+- ✅ **Containerized Applications**: Docker containers for both frontend and backend
+- ✅ **Kubernetes Deployments**: Multi-replica deployments with health checks
+- ✅ **Service Discovery**: ClusterIP services for internal communication
+- ✅ **Ingress Routing**: External access with path-based routing
+- ✅ **Health Checks**: Liveness and readiness probes
+- ✅ **Security**: Non-root containers with security contexts
+- ✅ **Resource Management**: CPU and memory limits/requests
+- ✅ **Development Workflow**: Skaffold for automated build/deploy
+- ✅ **Multi-Platform**: Compatible with kind, minikube, and cloud providers
+
+## 🛠️ Development Commands
+
 ```bash
-kubectl apply -f k8s-namespace/
-kubectl apply -f k8s/
-kubectl get pods -n demo
-kubectl get svc -n demo
+# Development
+make dev              # Start development with Skaffold
+make build            # Build Docker images
+make deploy           # Deploy to Kubernetes
+
+# Monitoring
+make status           # Show cluster status
+make logs             # Show application logs
+
+# Cleanup
+make clean            # Clean up resources
+make clean-kind       # Delete kind cluster
+make clean-minikube   # Stop minikube
 ```
 
-4. Apply Kubernetes manifests
+## 🌐 Cloud Provider Deployment
+
+The manifests are designed to work on any Kubernetes cluster:
+
+### Google Kubernetes Engine (GKE)
 ```bash
-kubectl get all -n demo
+# Create cluster
+gcloud container clusters create k8s-demo --zone=us-central1-a
+
+# Deploy
+skaffold run --profile=prod
 ```
 
-#### You should see an output such as:
+### Amazon EKS
 ```bash
-k8s-crash-course-demo git:(main) kubectl get all -n demo
-NAME                                       READY   STATUS    RESTARTS   AGE
-pod/api-deployment-5d46455c5d-k724b        1/1     Running   0          85s
-pod/api-deployment-5d46455c5d-mbkwb        1/1     Running   0          85s
-pod/frontend-deployment-5777788dd9-qmltj   1/1     Running   0          85s
+# Create cluster
+eksctl create cluster --name k8s-demo --region us-west-2
 
-NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
-service/api-service        ClusterIP   10.107.249.33   <none>        80/TCP         2m25s
-service/frontend-service   NodePort    10.99.1.230     <none>        80:30080/TCP   2m25s
+# Deploy
+skaffold run
+```
 
-NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/api-deployment        2/2     2            2           85s
-deployment.apps/frontend-deployment   1/1     1            1           85s
-
-NAME                                             DESIRED   CURRENT   READY   AGE
-replicaset.apps/api-deployment-5d46455c5d        2         2         2       85s
-replicaset.apps/frontend-deployment-5777788dd9   1         1         1       85s
-````
-
-6. Get service-url
-Since we're using minikube, we have to run the following command to get the frontend url
+### Azure Kubernetes Service (AKS)
 ```bash
-minikube service frontend-service -n demo --url
+# Create cluster
+az aks create --resource-group myResourceGroup --name k8s-demo
 
-# You will get something like:
-k8s-crash-course-demo git:(main) ✗ minikube service frontend-service -n demo --url
-http://127.0.0.1:60929
-❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+# Deploy
+skaffold run
 ```
 
-5. Access frontend at:
+## 🔧 Configuration
+
+### Skaffold Profiles
+
+- **dev**: Local development with port forwarding
+- **prod**: Production deployment with cloud build
+
+### Environment Variables
+
+The backend API supports these environment variables:
+- `NODE_ENV`: Environment (development/production)
+- `PORT`: Server port (default: 8080)
+
+### Ingress Configuration
+
+The ingress is configured for:
+- Frontend: `/` → k8s-demo-frontend-service:3000
+- Backend: `/api` → k8s-demo-api-service:8080
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Images not found**: Ensure Docker images are built and available
+2. **Ingress not working**: Check if ingress controller is installed
+3. **Port conflicts**: Ensure ports 80/443 are available for ingress
+
+### Debug Commands
+
+```bash
+# Check pod status
+kubectl get pods -n k8s-demo
+
+# Check service endpoints
+kubectl get endpoints -n k8s-demo
+
+# Check ingress status
+kubectl describe ingress -n k8s-demo
+
+# View logs
+kubectl logs -l app=k8s-demo-frontend -n k8s-demo
+kubectl logs -l app=k8s-demo-api -n k8s-demo
 ```
-http://<minikube-ip>:30080
-```
 
----
+## 📚 Learning Resources
 
-## 📖 Workshop
-See [Workshop.md](Workshop.md) for the step-by-step guide.
+This demo showcases:
+- Container orchestration with Kubernetes
+- Microservices architecture
+- Service mesh concepts
+- Health monitoring and observability
+- CI/CD with Skaffold
+- Cloud-native development practices
 
----
+## 🤝 Contributing
 
-## ✅ Learning Outcomes
-- Deployments, Pods, and Services in Kubernetes
-- Scaling and rolling updates
-- Service-to-service communication (frontend → API)
-- Delivering a microservice in a deployable state
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test with `make dev`
+5. Submit a pull request
 
+## 📄 License
+
+MIT License - see LICENSE file for details

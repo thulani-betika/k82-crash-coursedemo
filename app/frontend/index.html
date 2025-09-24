@@ -1,25 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Kubernetes Demo</title>
-</head>
-<body>
-  <h1>Frontend App</h1>
-  <button onclick="callApi()">Call API</button>
-  <p id="response"></p>
-
-  <script>
-    async function callApi() {
-      try {
-        // Call API through ingress
-        const res = await fetch("/api/hello");
-        const data = await res.json();
-        document.getElementById("response").innerText = data.message;
-      } catch (error) {
-        document.getElementById("response").innerText = "Error calling API: " + error.message;
-      }
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kubernetes Demo</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
