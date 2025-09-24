@@ -21,7 +21,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: k8s-demo-frontend:latest
+        image: thulani1960/k8s-demo-frontend:node
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
           name: http
@@ -49,10 +50,9 @@ spec:
           timeoutSeconds: 3
           failureThreshold: 3
         securityContext:
-          runAsNonRoot: true
-          runAsUser: 1001
+          runAsNonRoot: false
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           capabilities:
             drop:
             - ALL

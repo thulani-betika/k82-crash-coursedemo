@@ -21,7 +21,8 @@ spec:
     spec:
       containers:
       - name: api
-        image: k8s-demo-api:latest
+        image: thulani1960/k8s-demo-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http

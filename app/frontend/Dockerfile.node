@@ -17,18 +17,26 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:latest
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install serve package for static file serving
+RUN npm install -g serve
 
 # Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist ./dist
 
-# Copy custom nginx configuration
-COPY nginx-simple.conf /etc/nginx/conf.d/default.conf
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
-# Create necessary directories
-RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp /tmp
+# Change ownership
+RUN chown -R nodejs:nodejs /app
 
-# Keep running as root for nginx to work properly
+# Switch to non-root user
+USER nodejs
 
 # Expose port
 EXPOSE 3000
@@ -37,5 +45,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the application
+CMD ["serve", "-s", "dist", "-l", "3000"]
