@@ -23,10 +23,13 @@ FROM nginx:latest
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy custom nginx configuration
-COPY nginx-simple.conf /etc/nginx/conf.d/default.conf
+COPY nginx-simple.conf /etc/nginx/nginx.conf
 
-# Create necessary directories
-RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp /tmp
+# Create necessary directories and set permissions
+RUN mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp /tmp /run && \
+    chmod 777 /tmp /run && \
+    rm -rf /docker-entrypoint.d/ && \
+    chown -R root:root /usr/share/nginx/html
 
 # Keep running as root for nginx to work properly
 
