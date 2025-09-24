@@ -25,10 +25,18 @@ function App() {
     setError(null)
     try {
       const response = await axios.get(`${API_BASE_URL}/users`)
-      setUsers(response.data.users)
+      console.log('Users API response:', response.data)
+      // Ensure we have a valid response structure
+      if (response.data && response.data.users) {
+        setUsers(response.data.users)
+      } else {
+        console.warn('Invalid users response structure:', response.data)
+        setUsers([])
+      }
     } catch (err) {
       setError('Failed to fetch users')
       console.error('Failed to fetch users:', err)
+      setUsers([]) // Set to empty array on error
     } finally {
       setLoading(false)
     }
@@ -37,9 +45,17 @@ function App() {
   const fetchKubernetesInfo = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/kubernetes`)
-      setKubernetesInfo(response.data)
+      console.log('Kubernetes API response:', response.data)
+      // Ensure we have a valid response structure
+      if (response.data) {
+        setKubernetesInfo(response.data)
+      } else {
+        console.warn('Invalid Kubernetes response structure:', response.data)
+        setKubernetesInfo(null)
+      }
     } catch (err) {
       console.error('Failed to fetch Kubernetes info:', err)
+      setKubernetesInfo(null)
     }
   }
 
@@ -48,6 +64,9 @@ function App() {
     fetchUsers()
     fetchKubernetesInfo()
   }, [])
+
+  // Add debugging info
+  console.log('App render - users:', users, 'kubernetesInfo:', kubernetesInfo)
 
   return (
     <div className="app">
@@ -79,7 +98,7 @@ function App() {
             {loading ? 'Loading...' : 'Refresh Users'}
           </button>
           {error && <p className="error">{error}</p>}
-          {users.length > 0 && (
+          {users && Array.isArray(users) && users.length > 0 && (
             <div className="users-list">
               {users.map(user => (
                 <div key={user.id} className="user-item">
@@ -89,6 +108,9 @@ function App() {
                 </div>
               ))}
             </div>
+          )}
+          {users && Array.isArray(users) && users.length === 0 && (
+            <p>No users found</p>
           )}
         </div>
 
@@ -101,15 +123,15 @@ function App() {
               <div className="features">
                 <h3>Features:</h3>
                 <ul>
-                  {kubernetesInfo.features.map((feature, index) => (
+                  {kubernetesInfo.features && Array.isArray(kubernetesInfo.features) && kubernetesInfo.features.map((feature, index) => (
                     <li key={index}>✅ {feature}</li>
                   ))}
                 </ul>
               </div>
               <div className="cluster-info">
                 <h3>Cluster Info:</h3>
-                <p><strong>Node:</strong> {kubernetesInfo.cluster.node}</p>
-                <p><strong>Namespace:</strong> {kubernetesInfo.cluster.namespace}</p>
+                <p><strong>Node:</strong> {kubernetesInfo.cluster?.node || 'N/A'}</p>
+                <p><strong>Namespace:</strong> {kubernetesInfo.cluster?.namespace || 'N/A'}</p>
               </div>
             </div>
           ) : (
