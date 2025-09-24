@@ -61,6 +61,17 @@ replicaset.apps/api-deployment-5d46455c5d        2         2         2       85s
 replicaset.apps/frontend-deployment-5777788dd9   1         1         1       85s
 ````
 
+6. Get service-url
+Since we're using minikube, we have to run the following command to get the frontend url
+```bash
+minikube service frontend-service -n demo --url
+
+# You will get something like:
+k8s-crash-course-demo git:(main) ✗ minikube service frontend-service -n demo --url
+http://127.0.0.1:60929
+❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+```
+
 5. Access frontend at:
 ```
 http://<minikube-ip>:30080
