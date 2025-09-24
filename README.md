@@ -29,12 +29,39 @@ docker push your-dockerhub-username/k8s-frontend:latest
 
 3. Apply Kubernetes manifests
 ```bash
+kubectl apply -f k8s-namespace/
 kubectl apply -f k8s/
 kubectl get pods -n demo
 kubectl get svc -n demo
 ```
 
-4. Access frontend at:
+4. Apply Kubernetes manifests
+```bash
+kubectl get all -n demo
+```
+
+#### You should see an output such as:
+```bash
+k8s-crash-course-demo git:(main) kubectl get all -n demo
+NAME                                       READY   STATUS    RESTARTS   AGE
+pod/api-deployment-5d46455c5d-k724b        1/1     Running   0          85s
+pod/api-deployment-5d46455c5d-mbkwb        1/1     Running   0          85s
+pod/frontend-deployment-5777788dd9-qmltj   1/1     Running   0          85s
+
+NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/api-service        ClusterIP   10.107.249.33   <none>        80/TCP         2m25s
+service/frontend-service   NodePort    10.99.1.230     <none>        80:30080/TCP   2m25s
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api-deployment        2/2     2            2           85s
+deployment.apps/frontend-deployment   1/1     1            1           85s
+
+NAME                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/api-deployment-5d46455c5d        2         2         2       85s
+replicaset.apps/frontend-deployment-5777788dd9   1         1         1       85s
+````
+
+5. Access frontend at:
 ```
 http://<minikube-ip>:30080
 ```
