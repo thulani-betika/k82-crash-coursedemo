@@ -227,6 +227,12 @@ kubectl logs -l app=k8s-demo-frontend -n k8s-demo
 kubectl logs -l app=k8s-demo-api -n k8s-demo
 ```
 
+```bash
+# Port forward
+kubectl port-forward service/k8s-demo-frontend-service 3000:3000 -n k8s-demo
+```
+
+
 ## 📚 Learning Resources
 
 This demo showcases:
