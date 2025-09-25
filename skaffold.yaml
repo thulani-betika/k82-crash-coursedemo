@@ -2,6 +2,14 @@ apiVersion: skaffold/v2beta26
 kind: Config
 metadata:
   name: k8s-demo
+profiles:
+- name: minikube
+  build:
+    local:
+      push: false
+      useDockerCLI: true
+      useBuildkit: false
+      concurrency: 1
 build:
   artifacts:
   - image: k8s-demo-frontend
@@ -14,10 +22,16 @@ build:
       dockerfile: Dockerfile
   local:
     push: false
+    useDockerCLI: true
+    useBuildkit: false
+    concurrency: 1
 deploy:
   kubectl:
     manifests:
-      - k8s/*.yaml
+      - k8s/namespace.yaml
+      - k8s/deployment-*.yaml
+      - k8s/service-*.yaml
+      - k8s/ingress.yaml
     flags:
       global:
         - --namespace=k8s-demo

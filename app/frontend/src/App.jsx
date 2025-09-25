@@ -9,7 +9,9 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const API_BASE_URL = '/api'
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+    ? '/api'
+    : 'http://localhost:8080/api'
 
   const fetchApiStatus = async () => {
     try {

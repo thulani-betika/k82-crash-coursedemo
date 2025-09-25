@@ -9,10 +9,16 @@ echo "🚀 Setting up minikube for K8s Demo..."
 
 # Start minikube with ingress addon
 echo "Starting minikube..."
-minikube start --driver=docker --memory=4096 --cpus=2
+minikube start --driver=docker --memory=3072 --cpus=2
 
 echo "📦 Enabling ingress addon..."
 minikube addons enable ingress
+
+echo "📦 Running namespace k8s-demo"
+kubectl apply -f k8s/namespace.yaml
+
+echo "🐳 Configuring Docker to use minikube daemon..."
+eval $(minikube docker-env)
 
 echo "⏳ Waiting for ingress controller to be ready..."
 kubectl wait --namespace ingress-nginx \

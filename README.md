@@ -9,10 +9,15 @@ A complete Kubernetes demo project showcasing microservices deployment with fron
 - **Ingress**: Exposes frontend at `/` and backend at `/api`
 - **Kubernetes**: Deployments, Services, Ingress with health checks
 
-## 📋 Prerequisites
+## 
+```bash
+# Switch to Minikube's Docker Daemon
+eval $(minikube docker-env)
+```
 
+## 📋 Prerequisites
 - Docker
-- Kubernetes cluster (kind, minikube, or cloud provider)
+- Kubernetes cluster (minikube, or cloud provider)
 - Skaffold (for automated deployment)
 - kubectl
 
@@ -23,80 +28,28 @@ A complete Kubernetes demo project showcasing microservices deployment with fron
 curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
 sudo install skaffold /usr/local/bin/
 
-# Install kind (for local development)
-curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
-chmod +x ./kind
-sudo mv ./kind /usr/local/bin/kind
-
 # Install minikube (alternative to kind)
-curl -Lo minikube https://storage.k8s.io/releases/latest/minikube-linux-amd64
-sudo install minikube /usr/local/bin/
+curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-darwin-arm64
+sudo install minikube-darwin-arm64 /usr/local/bin/minikube
 ```
 
 ## 🚀 Quick Start
 
-### Option 1: Automated Setup (Recommended)
+### Setup App
 
 ```bash
-# For kind
-make quick-start-kind
-
 # For minikube  
-make quick-start-minikube
+make deploy
+
+# Expose the app for external access
+make serve
 ```
 
-### Option 2: Manual Setup
 
-#### Using kind
-
-1. **Setup kind cluster:**
-   ```bash
-   make setup-kind
-   ```
-
-2. **Start development:**
-   ```bash
-   make dev
-   ```
 
 3. **Access the application:**
-   - Frontend: http://localhost
-   - Backend API: http://localhost/api
-
-#### Using minikube
-
-1. **Setup minikube:**
-   ```bash
-   make setup-minikube
-   ```
-
-2. **Start development:**
-   ```bash
-   make dev
-   ```
-
-3. **Get minikube IP and access:**
-   ```bash
-   minikube ip
-   # Access at http://<minikube-ip>
-   ```
-
-### Option 3: Manual Deployment
-
-1. **Build images:**
-   ```bash
-   make build
-   ```
-
-2. **Deploy to Kubernetes:**
-   ```bash
-   make deploy
-   ```
-
-3. **Check status:**
-   ```bash
-   make status
-   ```
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3000/api
 
 ## 📁 Project Structure
 
@@ -115,9 +68,10 @@ make quick-start-minikube
 │   ├── deployment-*.yaml
 │   ├── service-*.yaml
 │   └── ingress.yaml
-├── skaffold.yaml         # Skaffold configuration
+├── skaffold.yaml        # Skaffold configuration
 ├── Makefile             # Convenient commands
-├── setup-kind.sh        # Kind setup script
+├── deploy.sh            # Simplified Skaffold deployment script
+├── run-skaffold.sh      # Port forwarding script
 ├── setup-minikube.sh    # Minikube setup script
 └── README.md
 ```
@@ -129,16 +83,12 @@ make quick-start-minikube
 - ✅ **Service Discovery**: ClusterIP services for internal communication
 - ✅ **Ingress Routing**: External access with path-based routing
 - ✅ **Health Checks**: Liveness and readiness probes
-- ✅ **Security**: Non-root containers with security contexts
-- ✅ **Resource Management**: CPU and memory limits/requests
 - ✅ **Development Workflow**: Skaffold for automated build/deploy
-- ✅ **Multi-Platform**: Compatible with kind, minikube, and cloud providers
 
 ## 🛠️ Development Commands
 
 ```bash
 # Development
-make dev              # Start development with Skaffold
 make build            # Build Docker images
 make deploy           # Deploy to Kubernetes
 
@@ -152,43 +102,11 @@ make clean-kind       # Delete kind cluster
 make clean-minikube   # Stop minikube
 ```
 
-## 🌐 Cloud Provider Deployment
-
-The manifests are designed to work on any Kubernetes cluster:
-
-### Google Kubernetes Engine (GKE)
-```bash
-# Create cluster
-gcloud container clusters create k8s-demo --zone=us-central1-a
-
-# Deploy
-skaffold run --profile=prod
-```
-
-### Amazon EKS
-```bash
-# Create cluster
-eksctl create cluster --name k8s-demo --region us-west-2
-
-# Deploy
-skaffold run
-```
-
-### Azure Kubernetes Service (AKS)
-```bash
-# Create cluster
-az aks create --resource-group myResourceGroup --name k8s-demo
-
-# Deploy
-skaffold run
-```
-
 ## 🔧 Configuration
 
 ### Skaffold Profiles
 
 - **dev**: Local development with port forwarding
-- **prod**: Production deployment with cloud build
 
 ### Environment Variables
 
@@ -200,7 +118,7 @@ The backend API supports these environment variables:
 
 The ingress is configured for:
 - Frontend: `/` → k8s-demo-frontend-service:3000
-- Backend: `/api` → k8s-demo-api-service:8080
+- Backend: `/api` → k8s-demo-api-service:3000
 
 ## 🐛 Troubleshooting
 

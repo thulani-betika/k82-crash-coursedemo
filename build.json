@@ -1,0 +1,1 @@
+{"builds":[{"imageName":"k8s-demo-frontend","tag":"k8s-demo-frontend:589aa2df259e731c4ea7aea1413b4074b2eb3b7922b55c7b97b476a317806570"},{"imageName":"k8s-demo-api","tag":"k8s-demo-api:586f16eb8013abbfc6f54895fee2f9f7813c95d1aa86172b9f1706f0807589e7"}]}
