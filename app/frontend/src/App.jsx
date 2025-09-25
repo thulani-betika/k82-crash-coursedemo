@@ -167,7 +167,6 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Built with ❤️ for Kubernetes learning</p>
         <p>Frontend: React + Vite | Backend: Node.js + Express</p>
       </footer>
     </div>
