@@ -27,7 +27,7 @@ function App() {
     setError(null)
     try {
       const response = await axios.get(`${API_BASE_URL}/users`)
-      console.log('Users API response:', response.data)
+      console.log('Users API responses:', response.data)
       // Ensure we have a valid response structure
       if (response.data && response.data.users) {
         setUsers(response.data.users)

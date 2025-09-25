@@ -21,7 +21,7 @@ eval $(minikube docker-env)
 - Skaffold (for automated deployment)
 - kubectl
 
-### Installing Prerequisites
+### Installing Dependencies
 
 ```bash
 # Install Skaffold
@@ -145,29 +145,13 @@ kubectl logs -l app=k8s-demo-frontend -n k8s-demo
 kubectl logs -l app=k8s-demo-api -n k8s-demo
 ```
 
-```bash
-# Port forward
-kubectl port-forward service/k8s-demo-frontend-service 3000:3000 -n k8s-demo
-```
-
-
 ## 📚 Learning Resources
 
 This demo showcases:
 - Container orchestration with Kubernetes
 - Microservices architecture
-- Service mesh concepts
 - Health monitoring and observability
 - CI/CD with Skaffold
-- Cloud-native development practices
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with `make dev`
-5. Submit a pull request
 
 ## 📄 License
 
